@@ -1,13 +1,9 @@
-import java.util.*;
+import java.util.LinkedList;
 
 class CustomHashMap<K, V> {
-    private static final int SIZE = 10; // Hash table size
-    private List<Entry<K, V>>[] map;
-
-    static class Entry<K, V> {
+    private static class Entry<K, V> {
         K key;
         V value;
-        Entry<K, V> next;
 
         Entry(K key, V value) {
             this.key = key;
@@ -15,54 +11,60 @@ class CustomHashMap<K, V> {
         }
     }
 
+    private static final int INITIAL_CAPACITY = 16;
+    private LinkedList<Entry<K, V>>[] buckets;
+
+    @SuppressWarnings("unchecked")
     public CustomHashMap() {
-        map = new LinkedList[SIZE];
+        buckets = (LinkedList<Entry<K, V>>[]) new LinkedList[INITIAL_CAPACITY];
     }
 
-    private int hash(K key) {
-        return Math.abs(key.hashCode() % SIZE);
+    private int getBucketIndex(K key) {
+        return Math.abs(key.hashCode() % buckets.length);
     }
 
     public void put(K key, V value) {
-        int index = hash(key);
-        if (map[index] == null) {
-            map[index] = new LinkedList<>();
+        int index = getBucketIndex(key);
+        if (buckets[index] == null) {
+            buckets[index] = new LinkedList<>();
         }
-
-        for (Entry<K, V> entry : map[index]) {
+        for (Entry<K, V> entry : buckets[index]) {
             if (entry.key.equals(key)) {
                 entry.value = value;
                 return;
             }
         }
-        map[index].add(new Entry<>(key, value));
+        buckets[index].add(new Entry<>(key, value));
     }
 
     public V get(K key) {
-        int index = hash(key);
-        if (map[index] != null) {
-            for (Entry<K, V> entry : map[index]) {
-                if (entry.key.equals(key)) {
-                    return entry.value;
-                }
+        int index = getBucketIndex(key);
+        if (buckets[index] == null) {
+            return null;
+        }
+        for (Entry<K, V> entry : buckets[index]) {
+            if (entry.key.equals(key)) {
+                return entry.value;
             }
         }
         return null;
     }
 
     public void remove(K key) {
-        int index = hash(key);
-        if (map[index] != null) {
-            map[index].removeIf(entry -> entry.key.equals(key));
+        int index = getBucketIndex(key);
+        if (buckets[index] == null) {
+            return;
         }
+        buckets[index].removeIf(entry -> entry.key.equals(key));
     }
 
     public static void main(String[] args) {
-        CustomHashMap<String, Integer> hashMap = new CustomHashMap<>();
-        hashMap.put("One", 1);
-        hashMap.put("Two", 2);
-        System.out.println(hashMap.get("One")); // Output: 1
-        hashMap.remove("One");
-        System.out.println(hashMap.get("One")); // Output: null
+        CustomHashMap<String, Integer> map = new CustomHashMap<>();
+        map.put("one", 1);
+        map.put("two", 2);
+        map.put("three", 3);
+        System.out.println("Value for key 'two': " + map.get("two")); // Output: 2
+        map.remove("two");
+        System.out.println("Value for key 'two' after deletion: " + map.get("two")); // Output: null
     }
 }
