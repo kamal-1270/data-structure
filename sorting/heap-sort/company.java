@@ -32,6 +32,7 @@ public class company {
             arr[0] = arr[i];
             arr[i] = temp;
 
+            // recursive call
             heapify(arr, i, 0);
 
         }
